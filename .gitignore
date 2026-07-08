@@ -3,6 +3,8 @@
 .venv/
 venv/
 *-env/
+.wiki-env/
+wiki-env/
 
 # Python
 __pycache__/
