@@ -10,7 +10,7 @@ from src.app.configs.environment import ENVIRONMENT_CONFIG, EnvKey
 
 APP_LOG_LEVEL = ENVIRONMENT_CONFIG[EnvKey.WIKI_LOG_LEVEL].upper()
 
-# stocker le request_id de la requête en cours sans que les requêtes ne se mélangent
+# Store the request_id of the current request without mixing requests
 _request_id: ContextVar[str | None] = ContextVar("_request_id", default=None)
 
 
@@ -29,7 +29,7 @@ def set_request_id(rid: str | None) -> str:
     return rid
 
 
-# intercepte chaque message de log et lui injecte l'attribut request_id
+# intercepts each log message and injects the request_id attribute into it
 class RequestIdFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         if not hasattr(record, "request_id") or record.request_id is None:
@@ -37,7 +37,7 @@ class RequestIdFilter(logging.Filter):
         return True
 
 
-# regarde si la requête contient déjà un header sinon il le génère
+# Checks if the request already contains a header; otherwise, it generates one.
 class RequestIdMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         rid = request.headers.get("x-request-id") or str(uuid.uuid4())
@@ -47,7 +47,7 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         return response
 
 
-# configuration des logs
+# logs configuration
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,

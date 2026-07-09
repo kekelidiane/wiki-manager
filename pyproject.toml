@@ -42,7 +42,7 @@ line-length = 88
 target-version = "py310"
 
 [tool.ruff.lint]
-# Règles standards (E/W: Pycodestyle, F: Pyflakes, I: Isort)
+Standard rules (E/W: Pycodestyle, F: Pyflakes, I: Isort)
 select = ["E", "W", "F", "I"]
 ignore = []
 

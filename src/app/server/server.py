@@ -33,7 +33,7 @@ class WikiServer:
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        # Optionnel esera restreint en Tâche 13
+        # Optional, this will be restricted in Task 13
         self._fastapi.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
         self._fastapi.include_router(api_router)
 
