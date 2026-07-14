@@ -42,7 +42,7 @@ line-length = 88
 target-version = "py310"
 
 [tool.ruff.lint]
-Standard rules (E/W: Pycodestyle, F: Pyflakes, I: Isort)
+#Standard rules (E/W: Pycodestyle, F: Pyflakes, I: Isort)
 select = ["E", "W", "F", "I"]
 ignore = []
 
@@ -51,6 +51,7 @@ minversion = "7.0"
 addopts = "-ra -q"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+pythonpath = ["src"]
 
 [tool.pyright]
 extraPaths = ["src"]
