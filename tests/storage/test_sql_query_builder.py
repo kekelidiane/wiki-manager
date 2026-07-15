@@ -1,4 +1,5 @@
 from typing import Generator, Optional
+
 import pytest
 from sqlmodel import Field, SQLModel
 
@@ -40,7 +41,10 @@ def test_select_builder_success(mock_pool: None) -> None:
     )
     sql, params = builder.build_query()
 
-    assert "SELECT username, email FROM users" in sql or "SELECT email, username FROM users" in sql
+    assert (
+        "SELECT username, email FROM users" in sql
+        or "SELECT email, username FROM users" in sql
+    )
     assert "WHERE" in sql
     assert "username = $1" in sql or "username = $2" in sql
     assert "email = $1" in sql or "email = $2" in sql
@@ -49,7 +53,10 @@ def test_select_builder_success(mock_pool: None) -> None:
     assert "OFFSET 5" in sql
     assert "Alice" not in sql
     assert "alice@example.com" not in sql
-    assert params == ["Alice", "alice@example.com"] or params == ["alice@example.com", "Alice"]
+    assert params == ["Alice", "alice@example.com"] or params == [
+        "alice@example.com",
+        "Alice",
+    ]
 
 
 def test_select_builder_unknown_where_column_raises_error() -> None:
@@ -75,7 +82,9 @@ def test_select_builder_order_dir_injection_rejected(invalid_dir: str) -> None:
 
 
 def test_select_builder_order_dir_normalized() -> None:
-    builder = SelectQueryBuilder(model_cls=User, order_by="username", order_dir=" asc  ")
+    builder = SelectQueryBuilder(
+        model_cls=User, order_by="username", order_dir=" asc  "
+    )
     sql, _ = builder.build_query()
     assert "ORDER BY username ASC" in sql
 
@@ -112,7 +121,9 @@ def test_update_builder_success() -> None:
 
 def test_update_builder_invalid_field_raises_error() -> None:
     with pytest.raises(ValueError):
-        UpdateQueryBuilder(model_cls=User, updated_fields=["fake_col"], where_fields=["id"])
+        UpdateQueryBuilder(
+            model_cls=User, updated_fields=["fake_col"], where_fields=["id"]
+        )
 
 
 def test_delete_builder_success() -> None:
@@ -121,6 +132,7 @@ def test_delete_builder_success() -> None:
 
     assert sql == "DELETE FROM users WHERE id = $1"
     assert params == [1]
+
 
 def test_delete_builder_no_where_raises_error() -> None:
     builder = DeleteQueryBuilder(model_cls=User, where_clauses={})
