@@ -1,8 +1,7 @@
 from sqlmodel import SQLModel
 
-#comment below is to solve the error < missing-import >
 # pyrefly: ignore [missing-import]
-from src.app.models.wiki import (
+from app.models.wiki import (
     Category,
     Media,
     Article,
@@ -13,7 +12,6 @@ from src.app.models.wiki import (
 )
 
 def test_metadata_contains_all_seven_tables():
-# names matching exactly the table_name attributes of models
     expected_tables = {
         "categories",
         "medias",

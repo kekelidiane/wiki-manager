@@ -1,4 +1,4 @@
-from src.app.models.wiki.wiki_models import (
+from app.models.wiki.wiki_models import (
     Article,
     ArticleCategoryLink,
     ArticleMediaLink,

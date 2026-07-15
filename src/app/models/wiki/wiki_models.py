@@ -21,9 +21,6 @@ class ReactionType(str, Enum):
     DISLIKE = "DISLIKE"
 
 
-# #type: ignore is use to ignore the type checking error of SQLModel 
-# bc iit says that the table_name is not defined when i test
-
 class ArticleCategoryLink(SQLModel, table=True):
     __tablename__ = "article_categories"  # type: ignore
     article_id: str = Field(foreign_key="articles.article_id", primary_key=True)
