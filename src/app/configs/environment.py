@@ -20,6 +20,9 @@ class EnvKey(Enum):
     WIKI_BINDING_HOST = auto()
     WIKI_BINDING_PORT = auto()
     WIKI_LOG_LEVEL = auto()
+    WIKI_DB_CONNEXION = auto()
+    WIKI_DB_MIN_CON = auto()
+    WIKI_DB_MAX_CON = auto()
 
 
 ENVIRONMENT_CONFIG = {k: get_env_or_default(k.name) for k in EnvKey}

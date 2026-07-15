@@ -19,6 +19,8 @@ dependencies = [
     "python-dotenv",
     "python-json-logger",
     "python-multipart",
+    "sqlmodel",
+    "sqlalchemy"
 ]
 
 [project.optional-dependencies]
