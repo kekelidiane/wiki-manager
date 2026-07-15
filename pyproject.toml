@@ -20,7 +20,8 @@ dependencies = [
     "python-json-logger",
     "python-multipart",
     "sqlmodel",
-    "sqlalchemy"
+    "sqlalchemy",
+    "asyncpg"
 ]
 
 [project.optional-dependencies]
@@ -47,6 +48,9 @@ target-version = "py310"
 #Standard rules (E/W: Pycodestyle, F: Pyflakes, I: Isort)
 select = ["E", "W", "F", "I"]
 ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/**/*.py" = ["E501"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
