@@ -63,7 +63,9 @@ class Comment(AuditMixin, table=True):
 class ArticleReaction(AuditMixin, table=True):
     __tablename__ = "article_reactions"  # type: ignore
     reaction_id: str = Field(max_length=40, unique=True, nullable=False)
-    article_id: str = Field(max_length=40, foreign_key="articles.article_id", index=True, nullable=False)
+    article_id: str = Field(
+        max_length=40, foreign_key="articles.article_id", index=True, nullable=False
+    )
     user_id: str = Field(max_length=55, index=True, nullable=False)
     reaction: ReactionType = Field(index=True, nullable=False)
     __table_args__ = (
@@ -79,23 +81,31 @@ class Article(AuditMixin, table=True):
     article_id: str = Field(max_length=40, unique=True, index=True, nullable=False)
     title: str = Field(index=True, nullable=False)
     content: str = Field(nullable=False)
-    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON, nullable=True))
-    sources: Optional[List[str]] = Field(default=None, sa_column=Column(JSON, nullable=True) )
+    tags: Optional[List[str]] = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
+    sources: Optional[List[str]] = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
     state: Status = Field(index=True, nullable=False)
     likes: int = Field(default=0, nullable=False)
     dislikes: int = Field(default=0, nullable=False)
     is_deleted: bool = Field(default=False, nullable=False, exclude=True)
     user_id: str = Field(index=True, nullable=False)
     admin_review: Optional[str] = Field(default=None, index=True, nullable=True)
-    cover_image_id: Optional[str] = Field(default=None, foreign_key="medias.media_id", nullable=True)
+    cover_image_id: Optional[str] = Field(
+        default=None, foreign_key="medias.media_id", nullable=True
+    )
 
-    categories: List[Category] = Relationship(back_populates="articles", link_model=ArticleCategoryLink)
+    categories: List[Category] = Relationship(
+        back_populates="articles", link_model=ArticleCategoryLink
+    )
     article_medias_gallery: List[Media] = Relationship(link_model=ArticleMediaLink)
     comments: List[Comment] = Relationship(
         back_populates="article",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
     reactions: List[ArticleReaction] = Relationship(
         back_populates="article",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )

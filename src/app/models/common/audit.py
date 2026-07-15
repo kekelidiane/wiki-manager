@@ -1,13 +1,19 @@
-from datetime import timezone, datetime
+from datetime import datetime, timezone
 from typing import Optional
+
 from sqlmodel import Field, SQLModel
 
 
 class AuditMixin(SQLModel):
     __abstract__ = True
     created_by: str = Field(max_length=55, nullable=False)
-    created_at: datetime = Field(default=datetime.now(timezone.utc),nullable=False,)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+    )
     updated_by: Optional[str] = Field(default=None, max_length=55, nullable=True)
-    updated_at: Optional[datetime] = Field(default=None,nullable=True,)
+    updated_at: Optional[datetime] = Field(
+        default=None,
+        nullable=True,
+    )
     version: int = Field(default=1, nullable=False)
     id: Optional[int] = Field(default=None, primary_key=True, index=True, exclude=True)

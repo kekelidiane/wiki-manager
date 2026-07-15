@@ -2,14 +2,14 @@ from sqlmodel import SQLModel
 
 # pyrefly: ignore [missing-import]
 from app.models.wiki import (
-    Category,
-    Media,
     Article,
-    Comment,
     ArticleReaction,
-    Status,
+    Category,
+    Comment,
     ReactionType,
+    Status,
 )
+
 
 def test_metadata_contains_all_seven_tables():
     expected_tables = {
@@ -22,6 +22,7 @@ def test_metadata_contains_all_seven_tables():
         "article_medias_gallery",
     }
     assert expected_tables.issubset(SQLModel.metadata.tables.keys())
+
 
 def test_instantiation_and_exclusions():
     category = Category(
