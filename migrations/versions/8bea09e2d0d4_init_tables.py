@@ -8,9 +8,9 @@ Create Date: 2026-07-15 23:08:00.603343
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 import sqlmodel
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "8bea09e2d0d4"
@@ -27,11 +27,11 @@ def upgrade() -> None:
         sa.Column(
             "created_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=False
         ),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
             "updated_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=True
         ),
-        sa.Column("updated_at", sa.DateTime(), nullable=True),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("category_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -49,11 +49,11 @@ def upgrade() -> None:
         sa.Column(
             "created_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=False
         ),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
             "updated_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=True
         ),
-        sa.Column("updated_at", sa.DateTime(), nullable=True),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
@@ -75,11 +75,11 @@ def upgrade() -> None:
         sa.Column(
             "created_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=False
         ),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
             "updated_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=True
         ),
-        sa.Column("updated_at", sa.DateTime(), nullable=True),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
@@ -157,11 +157,11 @@ def upgrade() -> None:
         sa.Column(
             "created_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=False
         ),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
             "updated_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=True
         ),
-        sa.Column("updated_at", sa.DateTime(), nullable=True),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
@@ -212,11 +212,11 @@ def upgrade() -> None:
         sa.Column(
             "created_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=False
         ),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
             "updated_by", sqlmodel.sql.sqltypes.AutoString(length=55), nullable=True
         ),
-        sa.Column("updated_at", sa.DateTime(), nullable=True),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
