@@ -23,6 +23,10 @@ class EnvKey(Enum):
     WIKI_DB_CONNEXION = auto()
     WIKI_DB_MIN_CON = auto()
     WIKI_DB_MAX_CON = auto()
+    WIKI_KEYCLOAK_URL = auto()
+    WIKI_KEYCLOAK_ISSUER = auto()
+    WIKI_KEYCLOAK_CLIENT_ID = auto()
+    WIKI_KEYCLOAK_CLIENT_SECRET = auto()
 
 
 ENVIRONMENT_CONFIG = {k: get_env_or_default(k.name) for k in EnvKey}
