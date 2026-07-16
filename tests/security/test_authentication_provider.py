@@ -45,7 +45,7 @@ def valid_claims(mock_env):
         "sub": "user-123",
         "preferred_username": "john_doe",
         "email": "john.doe@test.com",
-        "resource_access": {"orchestrateur": {"roles": ["employee", "manager"]}},
+        "resource_access": {"wiki-api": {"roles": ["employee", "manager"]}},
         "scope": "openid email",
         "iss": mock_env[EnvKey.WIKI_KEYCLOAK_ISSUER],
         "aud": mock_env[EnvKey.WIKI_KEYCLOAK_CLIENT_ID],

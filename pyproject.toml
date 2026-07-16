@@ -21,7 +21,9 @@ dependencies = [
     "python-multipart",
     "sqlmodel",
     "sqlalchemy",
-    "asyncpg"
+    "asyncpg",
+    "pyjwt[crypto]",
+    "httpx"
 ]
 
 [project.optional-dependencies]
