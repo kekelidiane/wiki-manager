@@ -6,6 +6,9 @@ class ApiErrorsCode:
     USER_ALREADY_EXISTS = 1001
     ROLE = 2000
     RESOURCE_ACCESS_DENIED = 9000
+    MEDIA_NOT_FOUND = 1000
+    MAX_MEDIA_SIZE = 1001
+    INVALID_MEDIA_TYPE = 1002
 
 
 class ApiException(Exception):

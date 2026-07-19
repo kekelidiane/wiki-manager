@@ -27,6 +27,12 @@ class EnvKey(Enum):
     WIKI_KEYCLOAK_ISSUER = auto()
     WIKI_KEYCLOAK_CLIENT_ID = auto()
     WIKI_KEYCLOAK_CLIENT_SECRET = auto()
+    WIKI_S3_ACCESS_KEY = auto()
+    WIKI_S3_SECRET_KEY = auto()
+    WIKI_S3_BUCKET_NAME = auto()
+    WIKI_S3_REGION = auto()
+    WIKI_S3_URL = auto()
+    AWS_BLOB_SAS_TTL_IN_SECS = auto()
 
 
 ENVIRONMENT_CONFIG = {k: get_env_or_default(k.name) for k in EnvKey}
