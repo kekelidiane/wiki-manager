@@ -5,14 +5,25 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import UploadFile
-from starlette.status import HTTP_404_NOT_FOUND
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from app.core.exceptions.api_exception import ApiErrorsCode, ApiException
 from app.models import Media
+from app.models.security.auth_user import AuthenticatedUser
 from app.storage.rds.clients.blob_manager import S3Client
 from app.storage.rds.datastore.interfaces.media import IMedia
 
 LOGGER = logging.getLogger(__name__)
+
+MAX_MEDIA_SIZE = 20 * 1024 * 1024
+
+ALLOWED_MIME_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/heic",
+    "image/webp",
+    "application/pdf",
+}
 
 
 class MediaService:
@@ -20,12 +31,27 @@ class MediaService:
         self._media_store = media_store
         self._blob_provider = blob_provider
 
-    async def upload_media(self, medias: list[UploadFile]) -> list[Media]:
+    async def upload_media(
+        self, medias: list[UploadFile], auth_user: AuthenticatedUser
+    ) -> list[Media]:
 
         medias_service: list[Media] = []
 
         for media in medias:
-            data = await media.read()
+            if media.content_type not in ALLOWED_MIME_TYPES:
+                raise ApiException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    error_code=ApiErrorsCode.INVALID_MEDIA_TYPED,
+                    message="Unsupported media type",
+                )
+
+            data = await media.read(MAX_MEDIA_SIZE + 1)
+            if len(data) > MAX_MEDIA_SIZE:
+                raise ApiException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    error_code=ApiErrorsCode.MAX_MEDIA_SIZE,
+                    message="Max file size exceeded",
+                )
             extension = os.path.splitext(media.filename)[1]
 
             unique_filename = urllib.parse.quote(
@@ -42,7 +68,7 @@ class MediaService:
                     "file_name": media.filename,
                     "file_type": media.content_type,
                     "url": url,
-                    "created_by": "test",
+                    "created_by": auth_user.user_id,
                     "created_at": datetime.now(timezone.utc),
                     "version": 1,
                 }
