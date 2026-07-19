@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Any, List, Optional
 
@@ -16,13 +17,17 @@ class DataBaseManager(IPostgresDatabaseManager):
     def __init__(self, configs: dict):
         self._connection_pool: Optional[asyncpg.Pool] = None
         self._config: dict = configs
+        self._lock = asyncio.Lock()  # avoid initialisation conflicts
 
-    def _ensure_pool(self) -> asyncpg.Pool:
+    async def _ensure_pool(self) -> asyncpg.Pool:
         if self._connection_pool is None:
-            raise DaoException(
-                "Database connection pool has not been initialized. "
-                "Please call 'connect()' before executing queries."
-            )
+            async with self._lock:
+                if self._connection_pool is None:
+                    logger.info(
+                        "Database pool not ready. Lazy initializing connection..."
+                    )
+                    await self.connect()
+
         return self._connection_pool
 
     async def connect(self) -> None:
@@ -51,13 +56,18 @@ class DataBaseManager(IPostgresDatabaseManager):
                 self._connection_pool = None
 
     @property
-    def connection_pool(self) -> Optional[asyncpg.Pool]:
+    def connection_pool(self) -> asyncpg.Pool:
+        if self._connection_pool is None:
+            raise DaoException(
+                "Database connection pool is not ready."
+                "Please verify execution context."
+            )
         return self._connection_pool
 
     async def execute(
         self, query: str, *args: Any, timeout: Optional[float] = None
     ) -> str:
-        pool = self._ensure_pool()
+        pool = await self._ensure_pool()
         try:
             return await pool.execute(query, *args, timeout=timeout)
         except Exception as exc:
@@ -67,7 +77,7 @@ class DataBaseManager(IPostgresDatabaseManager):
     async def execute_many(
         self, command: str, *args: Any, timeout: Optional[float] = None
     ) -> None:
-        pool = self._ensure_pool()
+        pool = await self._ensure_pool()
         try:
             return await pool.executemany(command, *args, timeout=timeout)
         except Exception as exc:
@@ -77,7 +87,7 @@ class DataBaseManager(IPostgresDatabaseManager):
     async def fetch(
         self, query: str, *args: Any, timeout: Optional[float] = None
     ) -> List[asyncpg.Record]:
-        pool = self._ensure_pool()
+        pool = await self._ensure_pool()
         try:
             return await pool.fetch(query, *args, timeout=timeout)
         except Exception as exc:
@@ -87,7 +97,7 @@ class DataBaseManager(IPostgresDatabaseManager):
     async def fetch_row(
         self, query: str, *args: Any, timeout: Optional[float] = None
     ) -> Optional[asyncpg.Record]:
-        pool = self._ensure_pool()
+        pool = await self._ensure_pool()
         try:
             return await pool.fetchrow(query, *args, timeout=timeout)
         except Exception as exc:
@@ -97,7 +107,7 @@ class DataBaseManager(IPostgresDatabaseManager):
     async def fetch_value(
         self, query: str, *args: Any, column: int = 0, timeout: Optional[float] = None
     ) -> Any:
-        pool = self._ensure_pool()
+        pool = await self._ensure_pool()
         try:
             return await pool.fetchval(query, *args, column=column, timeout=timeout)
         except Exception as exc:

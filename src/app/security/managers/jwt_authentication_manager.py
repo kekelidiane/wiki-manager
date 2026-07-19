@@ -18,8 +18,7 @@ class JWTAuthenticationManager(AuthenticationManager):
     def __init__(self, auth_token_client: AuthTokenClient, env: dict):
         self._auth_token_client = auth_token_client
         self._env = env
-        self._client_id = self._env.get(EnvKey.WIKI_KEYCLOAK_CLIENT_ID)
-        self._expected_audience = self._client_id
+        self._expected_audience = self._env.get(EnvKey.WIKI_KEYCLOAK_CLIENT_ID)
         self._expected_issuer = self._env.get(EnvKey.WIKI_KEYCLOAK_ISSUER)
 
     def supports(self, token: str) -> bool:
@@ -59,8 +58,8 @@ class JWTAuthenticationManager(AuthenticationManager):
             )
 
             resource_access = decoded_jwt.get("resource_access", {})
-            client_access = resource_access.get(self._client_id, {})
-            roles = client_access.get("roles", [])
+            orchestrateur_access = resource_access.get("orchestrateur", {})
+            roles = orchestrateur_access.get("roles", [])
 
             scope_raw = decoded_jwt.get("scope", "")
             scopes = scope_raw.split(" ") if scope_raw else []
