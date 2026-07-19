@@ -49,3 +49,35 @@ pytest
 2. Une branche par tâche : `feat/da/<slug>` depuis `develop`.
 3. Le détail du workflow (branches, commits, PR, review) est dans
    [`docs/tasks/README.md`](docs/tasks/README.md).
+
+
+### Démarrer MinIO
+
+Les tests d'intégration et le service de gestion des médias nécessitent
+qu'une instance MinIO soit accessible sur `http://localhost:9000`.
+
+Lancer MinIO avec Docker Compose :
+
+```bash
+docker compose up -d
+```
+
+Vérifier que le conteneur est bien démarré :
+
+```bash
+docker ps
+```
+
+Vous devez voir un conteneur MinIO exposant le port `9000`.
+
+Si le conteneur existe déjà mais est arrêté :
+
+```bash
+docker start minio
+```
+
+Vous pouvez vérifier que MinIO est accessible en ouvrant :
+
+```
+http://localhost:9000
+```
