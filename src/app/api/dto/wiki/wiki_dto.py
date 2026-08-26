@@ -30,3 +30,35 @@ class CategoryResponseDTO(BaseModel):
 
     # pyrefly: ignore [bad-assignment]
     model_config = ConfigDict(from_attributes=True)
+
+
+class CreateArticleDTO(BaseModel):
+    title: non_empty_string = Field(...)
+    content: str = Field(...)
+    categories: Optional[list[str]] = Field(None)
+    tags: Optional[list[str]] = Field(None)
+
+
+class UpdateArticleDTO(BaseModel):
+    article_id: id_max_40 = Field(...)
+    title: Optional[non_empty_string] = Field(None)
+    content: Optional[str] = Field(None)
+    categories: Optional[list[str]] = Field(None)
+    tags: Optional[list[str]] = Field(None)
+
+
+class RequestCorrectionDTO(BaseModel):
+    admin_review: str = Field(...)
+
+
+class ArticleResponseDTO(BaseModel):
+    article_id: str = Field(...)
+    title: str = Field(...)
+    content: str = Field(...)
+    created_by: str = Field(...)
+    created_at: datetime = Field(...)
+    updated_by: Optional[str] = Field(None)
+    updated_at: Optional[datetime] = Field(None)
+    version: int = Field(...)
+
+    model_config = ConfigDict(from_attributes=True)
