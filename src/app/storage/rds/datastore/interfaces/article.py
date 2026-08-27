@@ -1,5 +1,5 @@
 import abc
-from typing import List
+from typing import List, Optional
 
 from app.models import Article
 
@@ -14,7 +14,11 @@ class IArticle(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def load_article(self, article_id: str) -> Article | None:
+    async def load_article(self, article_id: str) -> Optional[Article]:
+        pass
+
+    @abc.abstractmethod
+    async def load_article_by_title(self, title: str) -> Optional[Article]:
         pass
 
     @abc.abstractmethod

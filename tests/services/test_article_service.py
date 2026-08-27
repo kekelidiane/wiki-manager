@@ -1,3 +1,4 @@
+import inspect
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -7,6 +8,8 @@ from app.core.exceptions.api_exception import ApiException
 from app.models.security.auth_user import AuthenticatedUser
 from app.models.wiki.wiki_models import Article
 from app.services.article.article_service import ArticleService
+from app.storage.rds.clients.database_manager import DataBaseManager
+from app.storage.rds.datastore.article.article_store import ArticleStore
 from app.storage.rds.datastore.interfaces.article import IArticle
 
 
@@ -43,6 +46,18 @@ def article_service(mock_article_store, mock_category_store, mock_media_store):
     )
 
 
+def test_article_store_implements_iarticle():
+    mock_db_manager = MagicMock(spec=DataBaseManager)
+
+    store_instance = ArticleStore(database_manager=mock_db_manager)
+    assert isinstance(store_instance, IArticle)
+
+    for name, method in inspect.getmembers(IArticle, predicate=inspect.isfunction):
+        assert hasattr(
+            store_instance, name
+        ), f"The method {name} is missing on ArticleStore"
+
+
 @pytest.mark.asyncio
 async def test_create_article_success(
     article_service, mock_article_store, mock_auth_user
@@ -69,6 +84,7 @@ async def test_create_article_success(
     result = await article_service.create_article(dto.model_dump(), mock_auth_user)
 
     assert result.title == "Introduction to Python"
+    mock_article_store.add_article.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -93,6 +109,7 @@ async def test_get_article_success(article_service, mock_article_store, mock_aut
 
     assert result.article_id == article_id
     assert result.title == "Advanced Python"
+    mock_article_store.load_article.assert_called_once_with(article_id)
 
 
 @pytest.mark.asyncio
@@ -124,14 +141,17 @@ async def test_delete_article_success(
         updated_by=None,
         updated_at=None,
         version=1,
+        is_deleted=False,
     )
 
     mock_article_store.load_article = AsyncMock(return_value=existing_article)
-    mock_article_store.delete = AsyncMock()
+    mock_article_store.update_article = AsyncMock(return_value=existing_article)
 
     await article_service.delete_article(article_id, mock_auth_user)
 
     mock_article_store.load_article.assert_called_once_with(article_id)
+    mock_article_store.update_article.assert_called_once_with(existing_article)
+    assert existing_article.is_deleted is True
 
 
 @pytest.mark.asyncio
