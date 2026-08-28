@@ -139,6 +139,13 @@ class ArticleStore(IArticle):
 
     async def update_article(self, article: Article) -> Article:
         updated_fields = [
+            "title",
+            "content",
+            "tags",
+            "sources",
+            "state",
+            "admin_review",
+            "cover_image_id",
             "is_deleted",
             "updated_by",
             "updated_at",

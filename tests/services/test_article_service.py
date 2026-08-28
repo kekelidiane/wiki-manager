@@ -1,4 +1,5 @@
 import inspect
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -6,7 +7,7 @@ import pytest
 from app.api.dto.wiki.wiki_dto import CreateArticleDTO
 from app.core.exceptions.api_exception import ApiException
 from app.models.security.auth_user import AuthenticatedUser
-from app.models.wiki.wiki_models import Article
+from app.models.wiki.wiki_models import Article, Status
 from app.services.article.article_service import ArticleService
 from app.storage.rds.clients.database_manager import DataBaseManager
 from app.storage.rds.datastore.article.article_store import ArticleStore
@@ -166,3 +167,36 @@ async def test_delete_article_not_found(
         await article_service.delete_article(article_id, mock_auth_user)
 
     assert exc_info.value.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_publish_article_state_change(
+    article_service, mock_article_store, mock_auth_user
+):
+    article_id = "uuid-publish-123"
+
+    existing_article = Article(
+        article_id=article_id,
+        title="Article à publier",
+        content="Contenu de l'article",
+        state=Status.SUBMITTED,
+        user_id=mock_auth_user.user_id,
+        created_by=mock_auth_user.user_id,
+        created_at=datetime.now(timezone.utc),
+        version=1,
+        is_deleted=False,
+    )
+
+    async def mock_update(article_to_update):
+        return article_to_update
+
+    mock_article_store.load_article = AsyncMock(return_value=existing_article)
+    mock_article_store.update_article = AsyncMock(side_effect=mock_update)
+
+    published_article = await article_service.publish(article_id, mock_auth_user)
+
+    assert published_article.state == Status.PUBLISHED
+    mock_article_store.update_article.assert_called_once_with(existing_article)
+
+    passed_article = mock_article_store.update_article.call_args[0][0]
+    assert passed_article.state == Status.PUBLISHED
