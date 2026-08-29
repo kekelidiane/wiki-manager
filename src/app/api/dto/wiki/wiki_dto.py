@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, constr
 
 id_max_40 = constr(min_length=1, max_length=40, strip_whitespace=True)
 non_empty_string = constr(min_length=1, strip_whitespace=True)
-
+comment_str = constr(min_length=1, max_length=128, strip_whitespace=True)
 
 class CreateCategoryDTO(BaseModel):
     title: non_empty_string = Field(...)
@@ -61,4 +61,24 @@ class ArticleResponseDTO(BaseModel):
     updated_at: Optional[datetime] = Field(None)
     version: int = Field(...)
 
+    model_config = ConfigDict(from_attributes=True)
+
+class AddCommentDTO(BaseModel):
+    content: comment_str = Field(...)
+
+class ReactionResponseDTO(BaseModel):
+    article_id: str = Field(...)
+    user_id: str = Field(...)
+    is_like: bool = Field(...)
+    created_at: datetime = Field(...)
+
+    model_config = ConfigDict(from_attributes=True)
+
+class CommentResponseDTO(BaseModel):
+    comment_id: str = Field(...)
+    article_id: str = Field(...)
+    content: str = Field(...)
+    created_by: str = Field(...)
+    created_at: datetime = Field(...)
+    
     model_config = ConfigDict(from_attributes=True)
