@@ -2,6 +2,7 @@ import logging
 from datetime import timezone
 from typing import Any, List, Optional
 
+from app.models import ArticleReaction, Comment
 from app.models.wiki import Article
 from app.storage.rds.clients.database_manager import DataBaseManager
 from app.storage.rds.commons.sql_query_builder import (
@@ -208,6 +209,7 @@ class ArticleStore(IArticle):
                             media_id,
                         )
 
+        # pyrefly: ignore [bad-return]
         return await self.load_article(article.article_id)
 
     async def delete_article(self, article_id: str) -> None:
@@ -244,3 +246,201 @@ class ArticleStore(IArticle):
         data["updated_at"] = updated_at
 
         return Article(**data)
+
+    async def get_reaction(
+        self, article_id: str, user_id: str
+    ) -> Optional[ArticleReaction]:
+        async with self._database_manager.connection_pool.acquire() as conn:
+            sql, params = SelectQueryBuilder(
+                model_cls=ArticleReaction,
+                where_clauses={"article_id": article_id, "user_id": user_id},
+                limit=1,
+            ).build_query()
+
+            row = await conn.fetchrow(sql, *params)
+            if not row:
+                return None
+            return ArticleReaction(**dict(row))
+
+    async def save_reaction(
+        self,
+        reaction: ArticleReaction,
+        like_delta: int,
+        dislike_delta: int,
+        is_update: bool = False,
+    ) -> ArticleReaction:
+        async with self._database_manager.connection_pool.acquire() as conn:
+            async with conn.transaction():
+                if is_update:
+                    sql, upd_cols, where_cols = UpdateQueryBuilder(
+                        model_cls=ArticleReaction,
+                        updated_fields=[
+                            "reaction",
+                            "updated_by",
+                            "updated_at",
+                            "version",
+                        ],
+                        where_fields=["reaction_id"],
+                        manage_version=False,
+                    ).sql_query()
+                    params = [getattr(reaction, c) for c in upd_cols] + [
+                        getattr(reaction, c) for c in where_cols
+                    ]
+                else:
+                    sql, cols = InsertQueryBuilder(ArticleReaction).sql_query()
+                    params = [getattr(reaction, c) for c in cols]
+
+                for i, val in enumerate(params):
+                    if hasattr(val, "tzinfo") and val is not None:
+                        params[i] = val.replace(tzinfo=None)
+
+                await conn.execute(sql, *params)
+
+                await conn.execute(
+                    """
+                    UPDATE articles
+                    SET likes = likes + $1, dislikes = dislikes + $2
+                    WHERE article_id = $3
+                    """,
+                    like_delta,
+                    dislike_delta,
+                    reaction.article_id,
+                )
+
+        # pyrefly: ignore [bad-return]
+        return await self.get_reaction(reaction.article_id, reaction.user_id)
+
+    async def remove_reaction(
+        self, reaction: ArticleReaction, like_delta: int, dislike_delta: int
+    ) -> None:
+        async with self._database_manager.connection_pool.acquire() as conn:
+            async with conn.transaction():
+                sql, params = DeleteQueryBuilder(
+                    model_cls=ArticleReaction,
+                    where_clauses={"reaction_id": reaction.reaction_id},
+                ).sql_query()
+
+                await conn.execute(sql, *params)
+
+                await conn.execute(
+                    """
+                    UPDATE articles
+                    SET likes = likes + $1, dislikes = dislikes + $2
+                    WHERE article_id = $3
+                    """,
+                    like_delta,
+                    dislike_delta,
+                    reaction.article_id,
+                )
+
+    async def load_reactions(
+        self, article_id: str, page_index: int, max_result: int, direction: str
+    ) -> List[ArticleReaction]:
+        page_index = max(0, page_index - 1)
+        limit = max(1, max_result)
+        offset = page_index * limit
+        order_dir = "ASC" if direction.upper() == "ASC" else "DESC"
+
+        async with self._database_manager.connection_pool.acquire() as conn:
+            sql, params = SelectQueryBuilder(
+                model_cls=ArticleReaction,
+                where_clauses={"article_id": article_id},
+                order_by="created_at",
+                order_dir=order_dir,
+                limit=limit,
+                offset=offset,
+            ).build_query()
+
+            rows = await conn.fetch(sql, *params)
+            return [ArticleReaction(**dict(row)) for row in rows]
+
+    async def count_reactions(self, article_id: str) -> int:
+        async with self._database_manager.connection_pool.acquire() as conn:
+            sql, params = SelectQueryBuilder(
+                model_cls=ArticleReaction,
+                where_clauses={"article_id": article_id},
+                selected_columns=["COUNT(1)::bigint AS total"],
+            ).build_query()
+
+            total = await conn.fetchval(sql, *params)
+            return int(total or 0)
+
+    async def add_comment(self, comment: Comment) -> Comment:
+        sql, cols = InsertQueryBuilder(Comment).sql_query()
+        params = [getattr(comment, c) for c in cols]
+
+        for i, val in enumerate(params):
+            if hasattr(val, "tzinfo") and val is not None:
+                params[i] = val.replace(tzinfo=None)
+
+        async with self._database_manager.connection_pool.acquire() as conn:
+            await conn.execute(sql, *params)
+
+        # pyrefly: ignore [bad-return]
+        return await self.load_comment(comment.comment_id)
+
+    async def update_comment(self, comment: Comment) -> Comment:
+        sql, upd_cols, where_cols = UpdateQueryBuilder(
+            model_cls=Comment,
+            updated_fields=["is_deleted", "updated_by", "updated_at", "version"],
+            where_fields=["comment_id"],
+            manage_version=False,
+        ).sql_query()
+
+        params = [getattr(comment, c) for c in upd_cols] + [
+            getattr(comment, c) for c in where_cols
+        ]
+        for i, val in enumerate(params):
+            if hasattr(val, "tzinfo") and val is not None:
+                params[i] = val.replace(tzinfo=None)
+
+        async with self._database_manager.connection_pool.acquire() as conn:
+            await conn.execute(sql, *params)
+
+        # pyrefly: ignore [bad-return]
+        return await self.load_comment(comment.comment_id)
+
+    async def load_comment(self, comment_id: str) -> Optional[Comment]:
+        async with self._database_manager.connection_pool.acquire() as conn:
+            sql, params = SelectQueryBuilder(
+                model_cls=Comment,
+                where_clauses={"comment_id": comment_id},
+                limit=1,
+            ).build_query()
+
+            row = await conn.fetchrow(sql, *params)
+            if not row:
+                return None
+            return Comment(**dict(row))
+
+    async def load_all_comments(
+        self, article_id: str, page_index: int, max_result: int, direction: str
+    ) -> List[Comment]:
+        page_index = max(0, page_index - 1)
+        limit = max(1, max_result)
+        offset = page_index * limit
+        order_dir = "ASC" if direction.upper() == "ASC" else "DESC"
+
+        async with self._database_manager.connection_pool.acquire() as conn:
+            sql, params = SelectQueryBuilder(
+                model_cls=Comment,
+                where_clauses={"article_id": article_id, "is_deleted": False},
+                order_by="created_at",
+                order_dir=order_dir,
+                limit=limit,
+                offset=offset,
+            ).build_query()
+
+            rows = await conn.fetch(sql, *params)
+            return [Comment(**dict(row)) for row in rows]
+
+    async def count_comments(self, article_id: str) -> int:
+        async with self._database_manager.connection_pool.acquire() as conn:
+            sql, params = SelectQueryBuilder(
+                model_cls=Comment,
+                where_clauses={"article_id": article_id, "is_deleted": False},
+                selected_columns=["COUNT(1)::bigint AS total"],
+            ).build_query()
+
+            total = await conn.fetchval(sql, *params)
+            return int(total or 0)

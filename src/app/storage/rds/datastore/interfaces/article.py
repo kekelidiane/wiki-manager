@@ -36,17 +36,25 @@ class IArticle(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def get_reaction(self, article_id: str, user_id: str) -> Optional[ArticleReaction]:
+    async def get_reaction(
+        self, article_id: str, user_id: str
+    ) -> Optional[ArticleReaction]:
         pass
 
     @abc.abstractmethod
     async def save_reaction(
-        self, reaction: ArticleReaction, like: int, dislike: int, is_update: bool = False
+        self,
+        reaction: ArticleReaction,
+        like: int,
+        dislike: int,
+        is_update: bool = False,
     ) -> ArticleReaction:
         pass
 
     @abc.abstractmethod
-    async def remove_reaction(self, reaction: ArticleReaction, like: int, dislike: int) -> None:
+    async def remove_reaction(
+        self, reaction: ArticleReaction, like: int, dislike: int
+    ) -> None:
         pass
 
     @abc.abstractmethod
