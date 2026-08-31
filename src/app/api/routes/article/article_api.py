@@ -10,6 +10,7 @@ from starlette.status import (
 )
 
 from app.api.dto.wiki.wiki_dto import (
+    AddCommentDTO,
     CreateArticleDTO,
     RequestCorrectionDTO,
     UpdateArticleDTO,
@@ -191,6 +192,174 @@ async def delete_article(
         )
     except ApiException as exc:
         LOGGER.error(f"Error deleting article: {exc}")
+        return ORJSONResponse(status_code=exc.status_code, content=exc.message)
+    except Exception as exc:
+        LOGGER.error(f"Unexpected exception: {exc}")
+        return ORJSONResponse(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            content=ApiException.server_internal_error(),
+        )
+
+
+@router.post("/{article_id}/like")
+async def like_article(
+    article_id: str,
+    wiki_services: WikiManagerServices = Depends(WIKI_MANAGER_FACTORY),
+    auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
+):
+    try:
+        reaction = await wiki_services.article_service.like_article(article_id, auth_user)
+        return ORJSONResponse(
+            status_code=HTTP_201_CREATED,
+            content=reaction.model_dump() if hasattr(reaction, "model_dump") else reaction,
+        )
+    except ApiException as exc:
+        LOGGER.error(f"Error liking article: {exc}")
+        return ORJSONResponse(status_code=exc.status_code, content=exc.message)
+    except Exception as exc:
+        LOGGER.error(f"Unexpected exception: {exc}")
+        return ORJSONResponse(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            content=ApiException.server_internal_error(),
+        )
+
+
+@router.post("/{article_id}/dislike")
+async def dislike_article(
+    article_id: str,
+    wiki_services: WikiManagerServices = Depends(WIKI_MANAGER_FACTORY),
+    auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
+):
+    try:
+        reaction = await wiki_services.article_service.dislike_article(article_id, auth_user)
+        return ORJSONResponse(
+            status_code=HTTP_201_CREATED,
+            content=reaction.model_dump() if hasattr(reaction, "model_dump") else reaction,
+        )
+    except ApiException as exc:
+        LOGGER.error(f"Error disliking article: {exc}")
+        return ORJSONResponse(status_code=exc.status_code, content=exc.message)
+    except Exception as exc:
+        LOGGER.error(f"Unexpected exception: {exc}")
+        return ORJSONResponse(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            content=ApiException.server_internal_error(),
+        )
+
+
+@router.delete("/{article_id}/cancel-reaction")
+async def cancel_reaction(
+    article_id: str,
+    wiki_services: WikiManagerServices = Depends(WIKI_MANAGER_FACTORY),
+    auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
+):
+    try:
+        await wiki_services.article_service.cancel_reaction(article_id, auth_user)
+        return Response(status_code=HTTP_204_NO_CONTENT)
+    except ApiException as exc:
+        LOGGER.error(f"Error canceling reaction: {exc}")
+        return ORJSONResponse(status_code=exc.status_code, content=exc.message)
+    except Exception as exc:
+        LOGGER.error(f"Unexpected exception: {exc}")
+        return ORJSONResponse(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            content=ApiException.server_internal_error(),
+        )
+
+
+@router.get("/{article_id}/reactions/list")
+async def get_reactions_list(
+    article_id: str,
+    page_size: int = 1,
+    max_results: int = 20,
+    direction: str = "DESC",
+    wiki_services: WikiManagerServices = Depends(WIKI_MANAGER_FACTORY),
+    auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
+):
+    try:
+        reactions_data = await wiki_services.article_service.load_reactions(
+            article_id=article_id, page_size=page_size, max_result=max_results, direction=direction
+        )
+        return ORJSONResponse(
+            status_code=HTTP_200_OK,
+            content=reactions_data,
+        )
+    except ApiException as exc:
+        LOGGER.error(f"Error getting reactions list: {exc}")
+        return ORJSONResponse(status_code=exc.status_code, content=exc.message)
+    except Exception as exc:
+        LOGGER.error(f"Unexpected exception: {exc}")
+        return ORJSONResponse(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            content=ApiException.server_internal_error(),
+        )
+
+
+@router.post("/{article_id}/comment")
+async def add_comment(
+    article_id: str,
+    comment_request: AddCommentDTO,
+    wiki_services: WikiManagerServices = Depends(WIKI_MANAGER_FACTORY),
+    auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
+):
+    try:
+        comment = await wiki_services.article_service.add_comment(
+            article_id, comment_request.model_dump(), auth_user
+        )
+        return ORJSONResponse(
+            status_code=HTTP_201_CREATED,
+            content=comment.model_dump() if hasattr(comment, "model_dump") else comment,
+        )
+    except ApiException as exc:
+        LOGGER.error(f"Error adding comment: {exc}")
+        return ORJSONResponse(status_code=exc.status_code, content=exc.message)
+    except Exception as exc:
+        LOGGER.error(f"Unexpected exception: {exc}")
+        return ORJSONResponse(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            content=ApiException.server_internal_error(),
+        )
+
+
+@router.get("/{article_id}/comments")
+async def get_comments_list(
+    article_id: str,
+    page_size: int = 1,
+    max_results: int = 20,
+    direction: str = "DESC",
+    wiki_services: WikiManagerServices = Depends(WIKI_MANAGER_FACTORY),
+    auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
+):
+    try:
+        comments_data = await wiki_services.article_service.load_comments(
+            article_id=article_id, page_size=page_size, max_result=max_results, direction=direction
+        )
+        return ORJSONResponse(
+            status_code=HTTP_200_OK,
+            content=comments_data,
+        )
+    except ApiException as exc:
+        LOGGER.error(f"Error getting comments list: {exc}")
+        return ORJSONResponse(status_code=exc.status_code, content=exc.message)
+    except Exception as exc:
+        LOGGER.error(f"Unexpected exception: {exc}")
+        return ORJSONResponse(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            content=ApiException.server_internal_error(),
+        )
+
+
+@router.delete("/comment/{comment_id}")
+async def delete_comment(
+    comment_id: str,
+    wiki_services: WikiManagerServices = Depends(WIKI_MANAGER_FACTORY),
+    auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
+):
+    try:
+        await wiki_services.article_service.delete_comment(comment_id, auth_user)
+        return Response(status_code=HTTP_204_NO_CONTENT)
+    except ApiException as exc:
+        LOGGER.error(f"Error deleting comment: {exc}")
         return ORJSONResponse(status_code=exc.status_code, content=exc.message)
     except Exception as exc:
         LOGGER.error(f"Unexpected exception: {exc}")
