@@ -61,6 +61,7 @@ class ArticleService:
         try:
             category_ids = payload.get("category_ids", [])
             if category_ids:
+                # pyrefly: ignore [missing-attribute]
                 categories = await self._category_store.get_categories_by_ids(
                     category_ids
                 )
@@ -68,6 +69,7 @@ class ArticleService:
 
             media_ids = payload.get("media_ids", [])
             if media_ids:
+                # pyrefly: ignore [missing-attribute]
                 medias = await self._media_store.get_medias_by_ids(media_ids)
                 new_article.article_medias_gallery = medias
 
@@ -148,11 +150,13 @@ class ArticleService:
 
         category_ids = payload.get("category_ids")
         if category_ids is not None:
+            # pyrefly: ignore [missing-attribute]
             categories = await self._category_store.get_categories_by_ids(category_ids)
             article.categories = categories
 
         media_ids = payload.get("media_ids")
         if media_ids is not None:
+            # pyrefly: ignore [missing-attribute]
             medias = await self._media_store.get_medias_by_ids(media_ids)
             article.article_medias_gallery = medias
 

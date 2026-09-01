@@ -36,6 +36,7 @@ async def create_article(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         article = await wiki_services.article_service.create_article(
             article_request.model_dump(), auth_user
         )
@@ -61,6 +62,7 @@ async def read_article(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         article = await wiki_services.article_service.get_article(article_id)
         return ORJSONResponse(
             status_code=HTTP_200_OK,
@@ -86,6 +88,7 @@ async def get_all_articles_list(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         articles_data = await wiki_services.article_service.get_all_articles(
             page_size=page_size, max_result=max_results, direction=direction
         )
@@ -112,6 +115,7 @@ async def update_and_resubmit_article(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         article = await wiki_services.article_service.update_and_resubmit(
             article_id, article_request.model_dump(exclude_unset=True), auth_user
         )
@@ -138,6 +142,7 @@ async def request_correction_article(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         article = await wiki_services.article_service.request_correction(
             article_id, request_dto.admin_review, auth_user
         )
@@ -163,6 +168,7 @@ async def publish_article(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         article = await wiki_services.article_service.publish(article_id, auth_user)
         return ORJSONResponse(
             status_code=HTTP_200_OK,
@@ -186,6 +192,7 @@ async def delete_article(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         await wiki_services.article_service.delete_article(article_id, auth_user)
         return Response(
             status_code=HTTP_204_NO_CONTENT,
@@ -208,10 +215,15 @@ async def like_article(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
-        reaction = await wiki_services.article_service.like_article(article_id, auth_user)
+        # pyrefly: ignore [missing-attribute]
+        reaction = await wiki_services.article_service.like_article(
+            article_id, auth_user
+        )
         return ORJSONResponse(
             status_code=HTTP_201_CREATED,
-            content=reaction.model_dump() if hasattr(reaction, "model_dump") else reaction,
+            content=(
+                reaction.model_dump() if hasattr(reaction, "model_dump") else reaction
+            ),
         )
     except ApiException as exc:
         LOGGER.error(f"Error liking article: {exc}")
@@ -231,10 +243,15 @@ async def dislike_article(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
-        reaction = await wiki_services.article_service.dislike_article(article_id, auth_user)
+        # pyrefly: ignore [missing-attribute]
+        reaction = await wiki_services.article_service.dislike_article(
+            article_id, auth_user
+        )
         return ORJSONResponse(
             status_code=HTTP_201_CREATED,
-            content=reaction.model_dump() if hasattr(reaction, "model_dump") else reaction,
+            content=(
+                reaction.model_dump() if hasattr(reaction, "model_dump") else reaction
+            ),
         )
     except ApiException as exc:
         LOGGER.error(f"Error disliking article: {exc}")
@@ -254,6 +271,7 @@ async def cancel_reaction(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         await wiki_services.article_service.cancel_reaction(article_id, auth_user)
         return Response(status_code=HTTP_204_NO_CONTENT)
     except ApiException as exc:
@@ -277,8 +295,12 @@ async def get_reactions_list(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         reactions_data = await wiki_services.article_service.load_reactions(
-            article_id=article_id, page_size=page_size, max_result=max_results, direction=direction
+            article_id=article_id,
+            page_size=page_size,
+            max_result=max_results,
+            direction=direction,
         )
         return ORJSONResponse(
             status_code=HTTP_200_OK,
@@ -303,6 +325,7 @@ async def add_comment(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         comment = await wiki_services.article_service.add_comment(
             article_id, comment_request.model_dump(), auth_user
         )
@@ -331,8 +354,12 @@ async def get_comments_list(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         comments_data = await wiki_services.article_service.load_comments(
-            article_id=article_id, page_size=page_size, max_result=max_results, direction=direction
+            article_id=article_id,
+            page_size=page_size,
+            max_result=max_results,
+            direction=direction,
         )
         return ORJSONResponse(
             status_code=HTTP_200_OK,
@@ -356,6 +383,7 @@ async def delete_comment(
     auth_user: AuthenticatedUser = Depends(AUTHENTICATION_PROVIDER),
 ):
     try:
+        # pyrefly: ignore [missing-attribute]
         await wiki_services.article_service.delete_comment(comment_id, auth_user)
         return Response(status_code=HTTP_204_NO_CONTENT)
     except ApiException as exc:
