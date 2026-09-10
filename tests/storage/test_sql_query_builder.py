@@ -39,7 +39,7 @@ def test_select_builder_success(mock_pool: None) -> None:
         order_by="username",
         order_dir="ASC",
     )
-    sql, params = builder.build_query()
+    sql, params = builder.sql_query()
 
     assert (
         "SELECT username, email FROM users" in sql
@@ -85,7 +85,7 @@ def test_select_builder_order_dir_normalized() -> None:
     builder = SelectQueryBuilder(
         model_cls=User, order_by="username", order_dir=" asc  "
     )
-    sql, _ = builder.build_query()
+    sql, _ = builder.sql_query()
     assert "ORDER BY username ASC" in sql
 
 
